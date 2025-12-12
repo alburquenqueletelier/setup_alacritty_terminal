@@ -1,0 +1,30 @@
+
+[font]
+normal = { family = "MesloLGS NF" }
+bold = { family = "MesloLGS NF" }
+italic = { family = "MesloLGS NF" }
+bold_italic = { family = "MesloLGS NF" }
+size = 12
+
+[window]
+padding.x = 8
+padding.y = 8
+
+[general]
+# Contenido MÍNIMO y LIMPIO para alacritty.toml
+
+# Importación del tema
+import = [
+    "~/.config/alacritty/themes/themes/dracula.toml",
+]
+
+[keyboard]
+bindings = [
+  # Corrección para el borrado de palabra en nano (Ctrl + Backspace -> Alt + Backspace)
+  # Usamos Unicode (\u001b = ESC, \u007f = DEL) para que TOML lo acepte.
+  { key = "Back", mods = "Control", chars = "\u001b\u007f" },
+
+  # Si tenías la línea "chars = "\x08"" que causó el error en la línea 24,
+  # también debes corregirla a:
+  # { key = "H", mods = "Control", chars = "\u0008" },
+]
