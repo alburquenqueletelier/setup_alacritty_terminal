@@ -17,31 +17,80 @@ fi
 
 # Install necessary packages
 echo "Installing necessary packages..."
-sudo apt install -y git curl wget build-essential zsh zip unzip code cmake g++ pkg-config libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3 rustup gzip scdoc
+sudo apt install -y git curl wget build-essential zsh zip unzip gpg cmake g++ pkg-config libfontconfig1-dev libxcb-xfixes0-dev libxkbcommon-dev python3 rustup gzip scdoc
 
-echo "Setting up Oh My Zsh..."
-sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+echo "Installing visual studio code"
+wget -qO- https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor > microsoft.gpg
+sudo install -D -o root -g root -m 644 microsoft.gpg /usr/share/keyrings/microsoft.gpg
+rm -f microsoft.gpg
+
+echo "deb [signed-by=/usr/share/keyrings/microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | sudo tee /etc/apt/sources.list.d/vscode.list > /dev/null
+echo "Types: deb
+URIs: https://packages.microsoft.com/repos/code
+Suites: stable
+Components: main
+Architectures: amd64,arm64,armhf
+Signed-By: /usr/share/keyrings/microsoft.gpg
+" > vscode.sources
+
+sudo apt install apt-transport-https &&
+sudo apt update &&
+sudo apt install -y code # or code-insiders
+
+echo "Git Setup"
+
+
+echo "Installing Oh My Zsh..."
+if [ ! -d "$HOME/.oh-my-zsh" ]; then
+    echo "Setting up Oh My Zsh..."
+    sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
+else
+    echo "Oh My Zsh is already installed."
+fi
 
 echo "Setting up Oh My Zsh with powerlevel10k..."
-git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
+if [ ! -d "$HOME/powerlevel10k" ]; then
+    echo "Setting up Oh My Zsh with powerlevel10k..."
+    git clone --depth=1 https://github.com/romkatv/powerlevel10k.git ~/powerlevel10k
+else
+    echo "Powerlevel10k is already installed."
+fi
+
 P10K_LINE='source ~/powerlevel10k/powerlevel10k.zsh-theme'
 if ! grep -Fxq "$P10K_LINE" ~/.zshrc; then
     echo "$P10K_LINE" >> ~/.zshrc
 fi
 
 echo "Installing Meslol Nerd Font..."
-
-FONT_DIR="$HOME/.local/share/fonts"
+FONT_DIR="/home/${SUDO_USER:-$USER}/.local/share/fonts"
 mkdir -p "$FONT_DIR" || { echo "Failed to create font directory"; exit 1; }
-cd "$FONT_DIR" || { echo "Failed to enter font directory"; exit 1; }
-wget -O Meslo.zip https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/Meslo.zip || { echo "Failed to download Meslo.zip"; exit 1; }
-unzip -o Meslo.zip || { echo "Failed to unzip Meslo.zip"; rm -f Meslo.zip; exit 1; }
-rm Meslo.zip
+if [ ! -f "$FONT_DIR/Meslo.zip" ]; then
+    echo "Downloading Meslo Nerd Font..."
+    wget -O "$FONT_DIR/Meslo.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/Meslo.zip || { echo "Failed to download Meslo.zip"; exit 1; }
+else
+    echo "Meslo Nerd Font already downloaded."
+fi
+
+if [ ! -d "$FONT_DIR/Meslo" ]; then
+    echo "Extracting Meslo Nerd Font..."
+    unzip -o "$FONT_DIR/Meslo.zip" -d "$FONT_DIR" || { echo "Failed to unzip Meslo.zip"; rm -f "$FONT_DIR/Meslo.zip"; exit 1; }
+    rm "$FONT_DIR/Meslo.zip" # Eliminar el archivo zip después de la extracción
+else
+    echo "Meslo Nerd Font is already extracted."
+fi
+
 fc-cache -fv || { echo "Failed to refresh font cache"; exit 1; }
+
 cd || { echo "Failed to return to home directory"; exit 1; }
+
+echo "Meslo Nerd Font installation completed."
 
 ## Install Alacritty Terminal
 echo "Installing Alacritty terminal..."
+
+rustup default stable
+rustc --version
+cargo --version
 
 ALACRITTY_DIR="$HOME/alacritty"
 if [ -d "$ALACRITTY_DIR" ]; then
@@ -80,6 +129,9 @@ if ! grep -Fxq "$FPATH_LINE" "${ZDOTDIR:-$HOME}/.zshrc"; then
     echo "$FPATH_LINE" >> "${ZDOTDIR:-$HOME}/.zshrc"
 fi
 cp extra/completions/_alacritty "$ZSH_FUNCTIONS_DIR/_alacritty"
+
+echo "Installing themes..."
+git clone 
 
 chsh -s $(which zsh)
 
