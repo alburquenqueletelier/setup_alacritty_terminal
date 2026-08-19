@@ -61,29 +61,20 @@ if ! grep -Fxq "$P10K_LINE" ~/.zshrc; then
     echo "$P10K_LINE" >> ~/.zshrc
 fi
 
-echo "Installing Meslol Nerd Font..."
-FONT_DIR="/home/${SUDO_USER:-$USER}/.local/share/fonts"
-mkdir -p "$FONT_DIR" || { echo "Failed to create font directory"; exit 1; }
-if [ ! -f "$FONT_DIR/Meslo.zip" ]; then
-    echo "Downloading Meslo Nerd Font..."
-    wget -O "$FONT_DIR/Meslo.zip" https://github.com/ryanoasis/nerd-fonts/releases/download/v3.1.1/Meslo.zip || { echo "Failed to download Meslo.zip"; exit 1; }
-else
-    echo "Meslo Nerd Font already downloaded."
-fi
+echo "Installing MesloLGS Nerd Font..."
+FONT_DIR="/home/${SUDO_USER:-$USER}/.local/share/fonts/MesloLGS"
+mkdir -p "$FONT_DIR" || { echo "Failed to create MesloLGS font directory"; exit 1; }
+cd "$FONT_DIR" || { echo "Failed to enter MesloLGS font directory"; exit 1; }
 
-if [ ! -d "$FONT_DIR/Meslo" ]; then
-    echo "Extracting Meslo Nerd Font..."
-    unzip -o "$FONT_DIR/Meslo.zip" -d "$FONT_DIR" || { echo "Failed to unzip Meslo.zip"; rm -f "$FONT_DIR/Meslo.zip"; exit 1; }
-    rm "$FONT_DIR/Meslo.zip" # Eliminar el archivo zip después de la extracción
-else
-    echo "Meslo Nerd Font is already extracted."
-fi
+wget -N 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Regular.ttf' || { echo "Failed to download MesloLGS NF Regular"; exit 1; }
+wget -N 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold.ttf' || { echo "Failed to download MesloLGS NF Bold"; exit 1; }
+wget -N 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Italic.ttf' || { echo "Failed to download MesloLGS NF Italic"; exit 1; }
+wget -N 'https://github.com/romkatv/powerlevel10k-media/raw/master/MesloLGS%20NF%20Bold%20Italic.ttf' || { echo "Failed to download MesloLGS NF Bold Italic"; exit 1; }
 
 fc-cache -fv || { echo "Failed to refresh font cache"; exit 1; }
-
 cd || { echo "Failed to return to home directory"; exit 1; }
 
-echo "Meslo Nerd Font installation completed."
+echo "MesloLGS Nerd Font installation completed."
 
 ## Install Alacritty Terminal
 echo "Installing Alacritty terminal..."
